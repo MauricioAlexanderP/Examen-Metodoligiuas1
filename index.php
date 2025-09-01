@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user['rol'] === 'paciente') {
           header("Location: vistaPaciente.php");
         } elseif ($user['rol'] === 'medico') {
-          header("Location: vistaMedico.php");
+          header("Location: vistaDoctor.php");
         } else {
           header("Location: dashboard.php");
         }
