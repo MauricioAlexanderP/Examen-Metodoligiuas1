@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'conexion.php'; // Archivo con $conn = new mysqli(...);
+require 'config/database.php'; // Usar conexión PDO desde config/database.php
 
 // Verificar que el usuario esté logueado
 if (!isset($_SESSION['usuario_id'])) {
@@ -14,13 +14,14 @@ $hoy = date('Y-m-d');
 $sql = "SELECT c.hora_inicio, c.hora_fin, u.nombre AS paciente, c.motivo
         FROM citas c
         JOIN usuarios u ON c.usuario_id = u.id
-        WHERE c.doctor_id = ? AND c.fecha = ?
+        WHERE c.doctor_id = :doctor_id AND c.fecha = :fecha
         ORDER BY c.hora_inicio ASC";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("is", $doctor_id, $hoy);
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':doctor_id', $doctor_id, PDO::PARAM_INT);
+$stmt->bindParam(':fecha', $hoy, PDO::PARAM_STR);
 $stmt->execute();
-$result = $stmt->get_result();
+$result = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -43,15 +44,15 @@ $result = $stmt->get_result();
             </tr>
         </thead>
         <tbody>
-            <?php if($result->num_rows > 0): ?>
-                <?php while($fila = $result->fetch_assoc()): ?>
+            <?php if(count($result) > 0): ?>
+                <?php foreach($result as $fila): ?>
                     <tr>
                         <td><?php echo date('H:i', strtotime($fila['hora_inicio'])); ?></td>
                         <td><?php echo date('H:i', strtotime($fila['hora_fin'])); ?></td>
                         <td><?php echo htmlspecialchars($fila['paciente']); ?></td>
                         <td><?php echo htmlspecialchars($fila['motivo']); ?></td>
                     </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <tr><td colspan="4">No tienes citas programadas para hoy.</td></tr>
             <?php endif; ?>
