@@ -6,6 +6,8 @@ session_start();
 if (isset($_SESSION['usuario_id'])) {
   if ($_SESSION['usuario_rol'] === 'paciente') {
     header("Location: vistaPaciente.php");
+  } elseif ($_SESSION['usuario_rol'] === 'medico') {
+    header("Location: vistaDoctor.php");
   } else {
     header("Location: dashboard.php");
   }
@@ -50,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Redirigir según el rol del usuario
         if ($user['rol'] === 'paciente') {
           header("Location: vistaPaciente.php");
+        } elseif ($user['rol'] === 'medico') {
+          header("Location: vistaMedico.php");
         } else {
           header("Location: dashboard.php");
         }
