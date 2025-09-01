@@ -4,7 +4,11 @@ session_start();
 
 // Redirigir si ya está logueado
 if (isset($_SESSION['usuario_id'])) {
-  header("Location: dashboard.php");
+  if ($_SESSION['usuario_rol'] === 'paciente') {
+    header("Location: vistaPaciente.php");
+  } else {
+    header("Location: dashboard.php");
+  }
   exit;
 }
 
@@ -43,8 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['usuario_nombre'] = $user['nombre'];
         $_SESSION['usuario_rol'] = $user['rol'];
 
-        // Redirigir al dashboard
-        header("Location: dashboard.php");
+        // Redirigir según el rol del usuario
+        if ($user['rol'] === 'paciente') {
+          header("Location: vistaPaciente.php");
+        } else {
+          header("Location: dashboard.php");
+        }
         exit;
       } else {
         $error = "Contraseña incorrecta.";
@@ -78,6 +86,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if (!empty($error)): ?>
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <?php echo $error; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['logout']) && $_GET['logout'] === 'success'): ?>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>✅ Sesión cerrada exitosamente.</strong> ¡Hasta pronto!
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     <?php endif; ?>
