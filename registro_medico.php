@@ -1,3 +1,54 @@
+<?php
+// Incluir el archivo de configuración de la base de datos
+require_once 'config/database.php';
+
+// Inicializar variables
+$mensaje = '';
+$tipoMensaje = '';
+
+// Procesar el formulario cuando se envía
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  try {
+    // Recoger los datos del formulario
+    $nombre = $_POST['nombre'] ?? '';
+    $apellido = $_POST['apellido'] ?? '';
+    $especialidad = $_POST['especialidad'] ?? '';
+    $horarioInicio = $_POST['horarioInicio'] ?? '';
+    $horarioFin = $_POST['horarioFin'] ?? '';
+
+    // Validación básica
+    if (empty($nombre) || empty($apellido) || empty($especialidad) || empty($horarioInicio) || empty($horarioFin)) {
+      throw new Exception("Todos los campos son obligatorios.");
+    }
+
+    // Preparar la consulta SQL para insertar los datos
+    $sql = "INSERT INTO medicos (nombre, apellido, especialidad, horario_inicio, horario_fin) 
+                VALUES (:nombre, :apellido, :especialidad, :horario_inicio, :horario_fin)";
+
+    // Preparar la sentencia
+    $stmt = $pdo->prepare($sql);
+
+    // Vincular parámetros
+    $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+    $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+    $stmt->bindParam(':especialidad', $especialidad, PDO::PARAM_STR);
+    $stmt->bindParam(':horario_inicio', $horarioInicio, PDO::PARAM_STR);
+    $stmt->bindParam(':horario_fin', $horarioFin, PDO::PARAM_STR);
+
+    // Ejecutar la consulta
+    $stmt->execute();
+
+    $mensaje = "Médico registrado exitosamente.";
+    $tipoMensaje = "success";
+  } catch (PDOException $e) {
+    $mensaje = "Error de base de datos: " . $e->getMessage();
+    $tipoMensaje = "danger";
+  } catch (Exception $e) {
+    $mensaje = "Error: " . $e->getMessage();
+    $tipoMensaje = "warning";
+  }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -51,7 +102,15 @@
       <div class="col-md-8">
         <div class="card p-4">
           <h2 class="text-center mb-4">Registro de Médico</h2>
-          <form>
+
+          <?php if (!empty($mensaje)): ?>
+            <div class="alert alert-<?php echo $tipoMensaje; ?> alert-dismissible fade show" role="alert">
+              <?php echo $mensaje; ?>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          <?php endif; ?>
+
+          <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="nombre" class="form-label">Nombre</label>
